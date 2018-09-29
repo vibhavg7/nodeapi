@@ -1,45 +1,43 @@
 var db = require('../models/db');
-var Fruits = require('../models/fruits');
-
-exports.getAllFruits = function(req, res, next) {
-    Fruits.find({},function(err,fruits){
-        if (err) return res.status(500).send("There was a problem finding the fruits.");            
-            //res.status(200).send(fruits);
-            res.json(fruits);
-    });    
-};
-
-exports.getFruitsById = function(req, res, next) {
-    Fruits.findOne({"_id":req.params.id},function(err,fruits){
-        if (err) return res.status(500).send("There was a problem finding the fruits.");            
-            //res.status(200).send(fruits);
-            res.json(fruits);
-    }); 
-};
+//var Fruits = require('../models/fruits');
+var counter = require('../models/counter');
+var mongoose = require('mongoose');
 
 exports.PostFruits = function(req,res,next){
-    var fruitsData = new Fruits(req.body);
-    fruitsData.save()
-    .then(item => {
-        res.status(200).send("fruits data saved to database");
-    })
-    .catch(err => {
-    //res.status(400).send("unable to save fruits data to database");
-    res.json(item);
+    
+    var FruitsSchema = new mongoose.Schema({
+        //key:Number,
+        name: String,
+        stock: Number,
+        our_price : Number,
+        market_price : Number,
+        details: String,
+        type: Boolean,
+        //product_img : String,
+        fruit_imgs: String,
+        //reviews :  String,
+        //rating : Number   
+    });    
+    
+    FruitsSchema.pre('save', function(next) {
+        console.log(this)
+        var doc = this;
+        counter.findByIdAndUpdate({_id: 'entityId'}, {$inc: { seq: 1} }, function(error, counter)   {
+            if(error)
+                return next(error);
+            doc.testvalue = counter.seq;
+            next();
+        });
+    });    
+    var Fruits1;    
+    try {
+        Fruits1 = mongoose.model('Fruits1')
+      } catch (error) {
+        Fruits1 = mongoose.model('Fruits1', FruitsSchema)
+    }    
+    var fruitsData = new Fruits1(req.body);   
+    fruitsData.save(function(error, animals) { 
+        res.json({ statusCode: 200, status :"User voucher successfully applied" ,voucher:animals._id});        
     });
-}
-
-exports.UpdateFruitsById = function(req,res,next){
-    var fruitsData = new Fruits(req.body);
-    Fruits.findOneAndUpdate({"_id": req.params.id},req.body, {new: true},function(err,fruits){
-        if (err) return res.status(500).send("There was a problem updating the fruits.");            
-        res.json(fruits);        
-    }); 
-}
-
-exports.DeleteFruits = function(req,res,next){
-    Fruits.findOneAndRemove({"_id":req.params.id},function(err,fruits){
-        if (err) throw err;        
-        res.json({ message: 'Product successfully deleted',statusCode:'4' });
-    })
+    
 }

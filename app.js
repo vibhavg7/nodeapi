@@ -12,7 +12,7 @@ var multer = require('multer');
 
 var index = require('./routes/index');
 var auth = require('./routes/auth');
-// var fruits = require('./routes/fruits');
+var fruits = require('./routes/fruits');
 // var veggies = require('./routes/veggies');
 var coupon = require('./routes/coupon');
 //var usercoupon = require('./routes/usercoupon');
@@ -54,6 +54,7 @@ app.use('/Products',Products);
 
 
 app.use('/orders', orders);
+app.use('/fruits', fruits);
 app.use('/coupon', coupon);
 app.use('/billing', billing);
 app.use('/deliveryAddress',deliveryAddress);
